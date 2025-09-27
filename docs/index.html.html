@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>전공과 시험 대비 학습 프로그램 · UDL/세션10문항/무중복</title>
+<style>
+  :root{
+    --bg:#ffffff; --fg:#1b1f23; --muted:#6a6f73; --primary:#2b6cb0; --accent:#38a169; --danger:#e53e3e;
+    --panel:#f5f7fb; --border:#e2e8f0; --focus:#805ad5; --shadow: 0 8px 24px rgba(0,0,0,0.08);
+    --font-system: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", "Segoe UI", Roboto, Helvetica, Arial, "맑은 고딕", "Malgun Gothic", sans-serif;
+  }
+  [data-contrast="high"]{
+    --bg:#000; --fg:#fff; --muted:#ddd; --primary:#00b3ff; --accent:#00ff99; --danger:#ff4D4D;
+    --panel:#111; --border:#333; --focus:#ffd400; --shadow:none;
+  }
+  *{ box-sizing:border-box; }
+  html,body{ height:100%; }
+  body{ margin:0; font-family: var(--font-system); color:var(--fg);
+        background:linear-gradient(180deg,var(--panel), var(--bg) 140px) no-repeat; }
+  .container{ max-width:1100px; margin:0 auto; padding:16px; }
+  header{ position:sticky; top:0; z-index:10; background:linear-gradient(180deg,var(--panel), var(--bg)); border-bottom:1px solid var(--border); }
+  .appbar{ display:flex; align-items:center; gap:16px; padding:12px 16px; }
+  .logo{ display:flex; align-items:center; gap:10px; font-weight:800; letter-spacing:0.2px; }
+  .logo .badge{ display:inline-flex; align-items:center; justify-content:center; width:36px; height:36px; border-radius:10px;
+    background: conic-gradient(from 180deg at 50% 50%, var(--primary), var(--accent)); color:#fff; font-weight:900; box-shadow: var(--shadow); }
+  .spacer{ flex:1; }
+  .toolbar{ display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+  .toolbar button, .toolbar select{ border:1px solid var(--border); background:#fff; color:var(--fg);
+    border-radius:10px; padding:8px 12px; cursor:pointer; box-shadow: var(--shadow); }
+  .toolbar button:focus, .btn:focus, select:focus{ outline:3px solid var(--focus); outline-offset:2px; }
+  main{ padding:16px; }
+  nav.tabs{ display:flex; gap:8px; flex-wrap:wrap; margin:12px 0 20px; }
+  nav.tabs button{ border:1px solid var(--border); background:#fff; color:var(--fg); border-radius:999px; padding:10px 14px; cursor:pointer; box-shadow: var(--shadow); }
+  nav.tabs button[aria-selected="true"]{ background:var(--primary); color:#fff; border-color:transparent; }
+  .panel{ background:#fff; border:1px solid var(--border); border-radius:16px; padding:18px; box-shadow: var(--shadow); }
+  .grid{ display:grid; gap:16px; } @media(min-width:900px){ .grid.two{ grid-template-columns: 1.1fr 0.9fr; } }
+  .section-title{ font-size:1.25rem; font-weight:800; margin:2px 0 10px; }
+  .subtle{ color:var(--muted); }
+  .kbadge{ display:inline-flex; align-items:center; gap:6px; border:1px solid var(--border); border-radius:999px; padding:4px 10px; font-size:12px; background: #fff; }
+  .kbadge .dot{ width:8px; height:8px; border-radius:50%; background:var(--accent); display:inline-block; }
+  .question-card{ border:1px solid var(--border); border-radius:14px; padding:16px; background:#f5f7fb; }
+  .question-text{ font-size:1.15rem; line-height:1.6; font-weight:700; }
+  .option{ display:flex; gap:10px; align-items:flex-start; border:1px solid var(--border); border-radius:12px; padding:12px; background:#fff; cursor:pointer; }
+  .option.big { padding:18px; font-size:1.15rem; }
+  .option input{ margin-top:4px; }
+  .option.correct{ border-color:var(--accent); }
+  .option.incorrect{ border-color:var(--danger); }
+  .choices{ display:grid; gap:10px; margin-top:12px; }
+  .controls{ display:flex; gap:8px; flex-wrap:wrap; margin-top:14px; }
+  .btn{ border:1px solid var(--border); background:var(--primary); color:#fff; border-radius:10px; padding:10px 14px; cursor:pointer; font-weight:700; box-shadow: var(--shadow); }
+  .btn.secondary{ background:#fff; color:var(--fg); }
+  .btn.ghost{ background:transparent; color:var(--primary); border-color:var(--primary); }
+  .status{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-top:10px; color:var(--muted); }
+  .status .pill{ padding:6px 10px; border-radius:999px; border:1px solid var(--border); background:#fff; font-weight:700; }
+  .explain{ margin-top:10px; border-left:4px solid var(--accent); padding:10px; background:#f0fff4; border-radius:8px; }
+  .scorecard{ display:grid; gap:10px; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); margin-top:12px; }
+  .tile{ border:1px solid var(--border); border-radius:14px; padding:12px; background:#fff; }
+  .hidden{ display:none !important; }
+  [data-fontsize="large"]{ font-size: 1.2rem; } [data-fontsize="xlarge"]{ font-size: 1.35rem; }
+  [data-letterspace="wide"]{ letter-spacing: 0.02em; } [data-lineheight="loose"]{ line-height: 1.8; }
+  [data-dyslexic="true"]{ font-family: "OpenDyslexic", var(--font-system); }
+  .sr-only{ position:absolute !important; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+  .pulse{ animation: pulse 0.6s ease-in-out; } @keyframes pulse{ 0%{ transform: scale(1);} 50%{ transform: scale(1.02);} 100%{ transform: scale(1);} }
+</style>
+</head>
+<body>
+<header>
+  <div class="appbar container" role="banner">
+    <div class="logo" aria-label="전공과 시험 대비 프로그램">
+      <div class="badge" aria-hidden="true">G</div>
+      <div>
+        <div>전공과 시험 대비 · 세션당 10문항 · 무중복</div>
+        <div class="subtle" style="font-size:12px;">UDL/학생별 관리/자동 진행</div>
+      </div>
+    </div>
+    <div class="spacer"></div>
+    <div class="toolbar" role="toolbar" aria-label="빠른 설정">
+      <label for="studentSelect" class="sr-only">학생 선택</label>
+      <select id="studentSelect" title="학생 선택"></select>
+      <button id="changeStudentBtn" title="학생 변경/추가">학생 관리</button>
+      <label class="sr-only" for="categoryFilter">영역</label>
+      <select id="categoryFilter" title="학습 영역 선택">
+        <option value="">전체 영역</option>
+        <option>의사소통</option><option>수 계산</option><option>생활문해</option><option>직업기초</option><option>안전</option><option>시민성</option>
+      </select>
+      <label class="sr-only" for="difficultyFilter">난이도</label>
+      <select id="difficultyFilter" title="난이도 선택">
+        <option value="">전체 난이도</option>
+        <option>기초</option><option>보통</option><option>심화</option>
+      </select>
+      <button id="ttsBtn" title="읽어주기 (Alt+L)">읽어주기</button>
+      <button id="contrastBtn" title="고대비 전환 (Alt+C)">고대비</button>
+      <button id="fontBtn" title="글자 키우기 (Alt+F)">글자+</button>
+      <button id="helpBtn" title="도움말 (H)">도움말</button>
+    </div>
+  </div>
+  <nav class="tabs container" role="tablist" aria-label="화면 전환">
+    <button class="tab" data-tab="study" role="tab" aria-selected="true">학습하기</button>
+    <button class="tab" data-tab="exam" role="tab">모의고사</button>
+    <button class="tab" data-tab="results" role="tab">성적표</button>
+    <button class="tab" data-tab="admin" role="tab">관리자</button>
+    <button class="tab" data-tab="settings" role="tab">설정</button>
+  </nav>
+</header>
+
+<main class="container" id="app">
+  <!-- STUDY -->
+  <section id="view-study" class="panel" role="tabpanel" aria-labelledby="tab-study">
+    <div class="grid two">
+      <div>
+        <div class="section-title">연습 문제 <span id="studentTag" class="subtle"></span></div>
+        <div class="kbadge"><span class="dot" aria-hidden="true"></span> 세션당 10문항 · 중복 없음 · 자동 다음</div>
+        <div class="question-card" id="studyCard" aria-live="polite">
+          <div class="subtle" id="qMeta"></div>
+          <div class="question-text" id="qText">문제 불러오는 중…</div>
+          <div class="question-text hidden" id="qTextEasy">쉬운 글: …</div>
+          <div class="choices" id="qChoices"></div>
+          <div class="controls">
+            <button class="btn" id="checkBtn">정답 확인 (Enter)</button>
+            <button class="btn secondary" id="hintBtn">힌트</button>
+            <button class="btn ghost" id="shuffleBtn">새 세션(10문항)</button>
+          </div>
+          <div class="explain hidden" id="qExplain" tabindex="0"></div>
+          <div class="status" id="qStatus"></div>
+        </div>
+      </div>
+      <aside aria-label="학습 요약">
+        <div class="section-title">진도/요약</div>
+        <div class="scorecard" id="scoreCard">
+          <div class="tile"><strong>세션 진행</strong><div id="statSession">0/10</div></div>
+          <div class="tile"><strong>푼 문제</strong><div id="statSolved">0</div></div>
+          <div class="tile"><strong>정답</strong><div id="statCorrect">0</div></div>
+          <div class="tile"><strong>정답률</strong><div id="statRate">0%</div></div>
+          <div class="tile"><strong>연속정답</strong><div id="statStreak">0</div></div>
+        </div>
+        <div style="margin-top:14px" class="subtle">단축키: <kbd>1-5</kbd> 보기 선택, <kbd>Enter</kbd> 확인, <kbd>Alt+L</kbd> 읽기</div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- EXAM -->
+  <section id="view-exam" class="panel hidden" role="tabpanel" aria-labelledby="tab-exam">
+    <div class="section-title">모의고사 <span id="studentTagExam" class="subtle"></span></div>
+    <div class="grid">
+      <div class="tile">
+        <div><strong>문항 수는 10문항으로 고정</strong></div>
+        <label style="margin-left:0;">제한 시간(분)
+          <input id="examMinutes" type="number" min="5" max="120" value="20" style="width:90px; margin-left:8px;">
+        </label>
+        <label style="margin-left:16px;">영역
+          <select id="examCategory">
+            <option value="">전체</option>
+            <option>의사소통</option><option>수 계산</option><option>생활문해</option><option>직업기초</option><option>안전</option><option>시민성</option>
+          </select>
+        </label>
+        <button class="btn" id="startExamBtn" style="margin-left:12px;">시작(10문항 무중복)</button>
+      </div>
+      <div class="question-card hidden" id="examCard">
+        <div class="subtle"><span id="examTimer">00:00</span> · <span id="examProgress">1/10</span></div>
+        <div class="question-text" id="examQText">문제</div>
+        <div class="choices" id="examChoices"></div>
+        <div class="controls">
+          <button class="btn" id="examSubmitBtn">답안 선택</button>
+          <button class="btn secondary" id="examNextBtn">다음</button>
+          <button class="btn ghost" id="examFinishBtn">종료</button>
+        </div>
+      </div>
+      <div class="panel hidden" id="examResult">
+        <div class="section-title">결과</div>
+        <div id="examSummary"></div>
+        <div class="controls" style="margin-top:10px;">
+          <button class="btn" id="saveResultBtn">성적 저장</button>
+          <button class="btn secondary" id="printResultBtn">인쇄/저장</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- RESULTS -->
+  <section id="view-results" class="panel hidden" role="tabpanel" aria-labelledby="tab-results">
+    <div class="section-title">성적표</div>
+    <div class="tile"><div id="history"></div></div>
+    <div class="controls" style="margin-top:10px;">
+      <button class="btn secondary" id="exportDataBtn">문항/성적 Export</button>
+      <input type="file" id="importFile" accept="application/json" class="hidden" />
+      <button class="btn" id="importDataBtn">문항 Import</button>
+      <button class="btn ghost" id="clearHistoryBtn">성적 초기화(현재 학생)</button>
+    </div>
+  </section>
+
+  <!-- ADMIN -->
+  <section id="view-admin" class="panel hidden" role="tabpanel" aria-labelledby="tab-admin">
+    <div class="section-title">관리자 · 문항 관리</div>
+    <div class="tile" id="adminGuard">
+      <label for="adminKey">관리 비밀번호</label>
+      <input id="adminKey" type="password" placeholder="숫자 4자리 권장" style="margin:0 8px;">
+      <button class="btn" id="adminLoginBtn">확인</button>
+      <span class="subtle">기본값: 0000</span>
+    </div>
+    <div id="adminPanel" class="hidden">
+      <div class="grid">
+        <div class="tile">
+          <h3>새 문항 추가</h3>
+          <label>영역
+            <select id="aCategory">
+              <option>의사소통</option><option>수 계산</option><option>생활문해</option><option>직업기초</option><option>안전</option><option>시민성</option>
+            </select>
+          </label>
+          <label style="margin-left:10px;">난이도
+            <select id="aDifficulty"><option>기초</option><option>보통</option><option>심화</option></select>
+          </label>
+          <textarea id="aQuestion" rows="3" placeholder="문항(질문)" style="width:100%; margin-top:8px;"></textarea>
+          <textarea id="aQuestionEasy" rows="2" placeholder="쉬운 글(선택)" style="width:100%; margin-top:6px;"></textarea>
+          <div id="aOptionsWrap">
+            <input class="aOption" placeholder="보기 1" style="width:100%; margin:4px 0;">
+            <input class="aOption" placeholder="보기 2" style="width:100%; margin:4px 0;">
+            <input class="aOption" placeholder="보기 3" style="width:100%; margin:4px 0;">
+            <input class="aOption" placeholder="보기 4" style="width:100%; margin:4px 0;">
+          </div>
+          <label>정답(번호)
+            <input id="aAnswer" type="number" min="1" max="5" value="1" style="width:80px; margin-left:8px;">
+          </label>
+          <textarea id="aHint" rows="2" placeholder="힌트(정답 노출 금지)" style="width:100%; margin-top:8px;"></textarea>
+          <textarea id="aExplain" rows="2" placeholder="해설(정답 공개)" style="width:100%; margin-top:6px;"></textarea>
+          <button class="btn" id="addQuestionBtn" style="margin-top:8px;">추가</button>
+        </div>
+        <div class="tile">
+          <h3>문항 목록</h3>
+          <div id="adminList" class="subtle">현재 문항 수: 0</div>
+          <div class="controls" style="margin-top:8px;">
+            <button class="btn secondary" id="downloadBankBtn">문항 Export</button>
+            <input type="file" id="uploadBankFile" accept="application/json" class="hidden" />
+            <button class="btn" id="uploadBankBtn">문항 Import</button>
+            <button class="btn ghost" id="resetBankBtn">샘플로 초기화</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SETTINGS -->
+  <section id="view-settings" class="panel hidden" role="tabpanel" aria-labelledby="tab-settings">
+    <div class="section-title">설정 · 접근성/UDL</div>
+    <div class="tile">
+      <label><input type="checkbox" id="setLargeFont"> 큰 글자</label>
+      <label style="margin-left:16px;"><input type="checkbox" id="setWideSpacing"> 글자 간격 넓게</label>
+      <label style="margin-left:16px;"><input type="checkbox" id="setLooseLine"> 줄 간격 넓게</label>
+      <label style="margin-left:16px;"><input type="checkbox" id="setDyslexic"> 난독 친화 폰트</label>
+      <label style="margin-left:16px;"><input type="checkbox" id="setHighContrast"> 고대비</label>
+    </div>
+    <div class="tile" style="margin-top:10px;">
+      <div><strong>UDL 옵션</strong></div>
+      <label><input type="checkbox" id="udlEasy"> 쉬운 글 표시</label>
+      <label style="margin-left:16px;"><input type="checkbox" id="udlHintFirst"> 힌트 먼저 보기</label>
+      <label style="margin-left:16px;"><input type="checkbox" id="udlBigButtons"> 큰 선택 버튼</label>
+      <label style="margin-left:16px;"><input type="checkbox" id="udlAutoTTS"> 자동 읽어주기</label>
+      <div class="subtle" style="margin-top:8px;">힌트에는 정답이 포함되지 않도록 자동 마스킹됩니다.</div>
+    </div>
+  </section>
+</main>
+
+<dialog id="helpDialog">
+  <h3>도움말</h3>
+  <ul>
+    <li>연습/모의고사 모두 <strong>세션당 10문항</strong>으로 고정, <strong>중복 없이</strong> 출제됩니다.</li>
+    <li>힌트는 정답 번호/정답 보기를 자동으로 <strong>마스킹</strong>합니다.</li>
+  </ul>
+  <button id="helpCloseBtn" class="btn" style="margin-top:6px;">닫기</button>
+</dialog>
+
+<dialog id="studentDialog">
+  <h3>학생 이름 입력</h3>
+  <p>이름을 입력하면 성적과 학습 기록이 학생별로 저장됩니다.</p>
+  <input id="studentNameInput" placeholder="예: 김가람" style="width:100%; padding:10px; margin:8px 0;">
+  <div class="controls">
+    <button class="btn" id="studentSaveBtn">저장</button>
+    <button class="btn secondary" id="studentCancelBtn">닫기</button>
+  </div>
+</dialog>
+
+<script>
+// ------------------ 데이터 ------------------
+const DEFAULT_BANK = [
+  {id:1, category:"의사소통", difficulty:"기초", type:"mcq",
+   q:"손님에게 음료를 건넬 때 가장 알맞은 말은 무엇일까요?",
+   simple:"손님에게 컵을 줄 때 뭐라고 말하면 좋을까요?",
+   options:["받으세요.","먹어.","이거.","가져가."], answer:1,
+   hint:"공손한 표현, 완전한 문장", explain:"서비스 상황에서는 공손한 존댓말 ‘받으세요’처럼 완전한 문장이 적절합니다."},
+  {id:2, category:"의사소통", difficulty:"보통", type:"mcq",
+   q:"다음 중 대화 예절로 알맞은 행동은?",
+   simple:"대화할 때 올바른 행동은 무엇일까요?",
+   options:["상대 말 끊기","눈을 피하기","고개 끄덕이며 듣기","휴대폰 보며 대답하기"], answer:3,
+   hint:"경청의 비언어적 신호", explain:"적극적 경청에는 눈맞춤과 고개 끄덕임 같은 비언어적 신호가 포함됩니다."},
+  {id:3, category:"수 계산", difficulty:"기초", type:"mcq",
+   q:"2,500원짜리 음료 두 잔의 가격은?",
+   simple:"2,500원 음료 2잔은 얼마인가요?",
+   options:["2,500원","5,000원","4,500원","3,000원"], answer:2,
+   hint:"곱셈으로 생각", explain:"2,500 × 2 = 5,000원입니다."},
+  {id:4, category:"수 계산", difficulty:"보통", type:"mcq",
+   q:"7,200원을 현금 10,000원으로 결제했습니다. 거स름돈은?",
+   simple:"7,200원을 10,000원 냈을 때 거스름돈은 얼마인가요?",
+   options:["2,800원","3,200원","2,700원","1,800원"], answer:1,
+   hint:"뺄셈으로 계산", explain:"10,000 - 7,200 = 2,800원입니다."},
+  {id:5, category:"생활문해", difficulty:"기초", type:"mcq",
+   q:"지하철 ‘환승’ 표지판은 무엇을 의미하나요?",
+   simple:"지하철에서 ‘환승’은 무엇을 뜻하나요?",
+   options:["지금 하차","다른 노선으로 갈아탐","화장실","출구"], answer:2,
+   hint:"다른 노선, 갈아타기", explain:"‘환승’은 다른 노선으로 갈아타는 것을 뜻합니다."},
+  {id:6, category:"생활문해", difficulty:"보통", type:"mcq",
+   q:"약 봉투에 ‘식후 30분’이라고 적혀 있습니다. 언제 먹어야 하나요?",
+   simple:"약 봉투에 ‘식후 30분’. 언제 먹나요?",
+   options:["밥 먹기 30분 전","밥 먹는 중","밥 먹고 30분 후","아침에만"], answer:3,
+   hint:"식사 이후 일정 시간", explain:"‘식후 30분’은 식사 후 30분이 지났을 때 복용한다는 의미입니다."},
+  {id:7, category:"직업기초", difficulty:"보통", type:"mcq",
+   q:"근무 중 고객이 불만을 이야기합니다. 가장 바른 대처는?",
+   simple:"손님이 불만을 말할 때 어떻게 해야 하나요?",
+   options:["무시한다","변명부터 한다","경청하고 해결 방법을 안내한다","다른 직원 탓을 한다"], answer:3,
+   hint:"경청→공감→안내", explain:"경청→공감→해결 안내의 순서가 기본입니다."},
+  {id:8, category:"직업기초", difficulty:"심화", type:"mcq",
+   q:"지각을 줄이기 위한 가장 효과적인 방법은?",
+   simple:"지각하지 않으려면 무엇이 가장 좋을까요?",
+   options:["알람 끄기","출근 시간에 맞춰 출발","전날 준비와 여유 출발","버스 놓치면 연락 안 함"], answer:3,
+   hint:"전날 준비·시간 여유", explain:"전날 준비와 여유 있는 출발이 지각 예방에 효과적입니다."},
+  {id:9, category:"안전", difficulty:"기초", type:"mcq",
+   q:"불이 났을 때 올바른 행동은?",
+   simple:"불이 나면 어떻게 해야 하나요?",
+   options:["엘리베이터 이용","젖은 수건으로 코·입 가리고 대피","불쪽으로 달려감","아무것도 안 함"], answer:2,
+   hint:"호흡 보호·계단 대피", explain:"화재 시 계단 이용, 낮은 자세, 젖은 수건으로 호흡 보호가 기본입니다."},
+  {id:10, category:"안전", difficulty:"보통", type:"mcq",
+   q:"보행 신호가 빨간불일 때는?",
+   simple:"보행자 신호가 빨간불일 때 어떻게 하나요?",
+   options:["빨리 건넌다","뛰어간다","기다린다","눈치 보고 건넌다"], answer:3,
+   hint:"신호 지키기", explain:"빨간불은 정지, 초록불에서 건넙니다."},
+  {id:11, category:"시민성", difficulty:"보통", type:"mcq",
+   q:"개인정보를 안전하게 지키는 방법으로 알맞은 것은?",
+   simple:"비밀번호/개인정보를 안전하게 지키는 방법은?",
+   options:["비밀번호를 친구와 공유","생일 0000 사용","공공장소에서 큰소리로 주민번호 말하기","비밀번호를 주기적으로 변경"], answer:4,
+   hint:"공유 금지·정기 변경", explain:"비밀번호의 정기적 변경과 유출 금지가 기본 수칙입니다."},
+  {id:12, category:"시민성", difficulty:"기초", type:"mcq",
+   q:"쓰레기를 길에 버리면?",
+   simple:"길에 쓰레기를 버리면 어떻게 될까요?",
+   options:["괜찮다","환경이 더러워진다","다른 사람이 치운다","문제가 없다"], answer:2,
+   hint:"환경 영향 생각", explain:"공공장소 청결은 모두의 책임이며, 지정된 장소에 버려야 합니다."},
+];
+
+// 상태/세션
+let bank = loadBank();
+let voicesReady = false;
+let solved=0, correct=0, streak=0;
+let selectedOption = null;
+
+// STUDY 세션(10문항 고정, 무중복)
+let studySession = { pool: [], index: 0 }; // pool: 질문 배열, index: 0..9
+
+// 학생 관리
+initStudents();
+
+// 설정 로드
+applySavedSettings();
+
+// 초기화
+renderFilters();
+gotoTab("study");
+startNewStudySession(); // 10문항 세션 구성
+renderStudyQuestion();
+
+// ---------- 유틸 ----------
+function save(key, value){ localStorage.setItem(key, JSON.stringify(value)); }
+function load(key, fallback){ try{ const v = JSON.parse(localStorage.getItem(key)); return v ?? fallback; } catch(e){ return fallback; } }
+function shuffle(arr){ for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; } return arr; }
+function ttsSpeak(text){
+  if(!("speechSynthesis" in window)) return alert("이 브라우저는 읽어주기를 지원하지 않습니다.");
+  const u = new SpeechSynthesisUtterance(text); u.lang="ko-KR";
+  const vs = speechSynthesis.getVoices().filter(v=>v.lang.startsWith("ko")); if(vs.length){ u.voice = vs[0]; }
+  speechSynthesis.cancel(); speechSynthesis.speak(u);
+}
+function maskAnswerInText(text, q){
+  if(!text) return "";
+  let t = String(text);
+  // 마스킹: 정답 번호 패턴
+  const n = q.answer;
+  const numPatterns = [ `${n}번`, `${n} 번`, `(${n})`, `[${n}]`, `⓵⓶⓷⓸⓹⓺⓻⓼⓽⓾`.charAt(n-1) || "" ];
+  numPatterns.forEach(p=>{ if(p) t = t.replaceAll(p, "○번"); });
+  // 마스킹: 정답 보기 텍스트
+  const ansText = q.options[n-1];
+  if(ansText && ansText.length>0){
+    const escaped = ansText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    t = t.replace(new RegExp(escaped, "g"), "○○");
+  }
+  return t;
+}
+
+// ---------- 학생 ----------
+function initStudents(){
+  const list = load("jg_students", []);
+  let current = load("jg_current_student", "");
+  if(!list.length){
+    openStudentDialog();
+  } else {
+    if(!current){ current = list[0]; save("jg_current_student", current); }
+    renderStudentUI();
+  }
+}
+function openStudentDialog(){
+  const dlg = document.getElementById("studentDialog");
+  dlg.showModal();
+  document.getElementById("studentSaveBtn").onclick = ()=>{
+    const name = document.getElementById("studentNameInput").value.trim();
+    if(!name) return alert("이름을 입력해 주세요.");
+    const list = load("jg_students", []);
+    if(!list.includes(name)) { list.push(name); save("jg_students", list); }
+    save("jg_current_student", name);
+    dlg.close();
+    renderStudentUI(); renderHistory();
+  };
+  document.getElementById("studentCancelBtn").onclick = ()=>{ dlg.close(); if(!load("jg_students", []).length){ openStudentDialog(); } };
+}
+function renderStudentUI(){
+  const list = load("jg_students", []);
+  const cur = load("jg_current_student", "");
+  const sel = document.getElementById("studentSelect");
+  sel.innerHTML = "";
+  list.forEach(n=>{ const opt=document.createElement("option"); opt.value=n; opt.textContent=n; if(n===cur) opt.selected=true; sel.appendChild(opt); });
+  document.getElementById("studentTag").textContent = cur? `· 현재 학생: ${cur}`:"";
+  document.getElementById("studentTagExam").textContent = cur? `· 현재 학생: ${cur}`:"";
+  document.getElementById("changeStudentBtn").onclick = ()=> openStudentDialog();
+  sel.onchange = ()=>{ save("jg_current_student", sel.value); renderStudentUI(); renderHistory(); };
+}
+
+// ---------- 문항/필터 ----------
+function loadBank(){ const saved = load("jg_bank", null); return (saved && Array.isArray(saved) && saved.length) ? saved : DEFAULT_BANK.slice(); }
+function persistBank(){ save("jg_bank", bank); }
+function getFilteredBank(){
+  const cat = document.getElementById("categoryFilter").value;
+  const diff = document.getElementById("difficultyFilter").value;
+  return bank.filter(q=>(!cat||q.category===cat)&&(!diff||q.difficulty===diff));
+}
+function renderFilters(){
+  document.getElementById("categoryFilter").addEventListener("change",()=>{ startNewStudySession(); renderStudyQuestion(); });
+  document.getElementById("difficultyFilter").addEventListener("change",()=>{ startNewStudySession(); renderStudyQuestion(); });
+}
+
+// ---------- STUDY (세션 10문항 고정) ----------
+function startNewStudySession(){
+  const poolSource = getFilteredBank().slice();
+  if(poolSource.length < 10){
+    alert(`현재 필터에 해당하는 문항이 ${poolSource.length}개입니다. 10문항 이상이 되도록 문항을 추가하거나 필터를 넓혀 주세요.`);
+  }
+  const pool = shuffle(poolSource).slice(0,10); // 10문항 고정
+  studySession = { pool, index: 0 };
+  solved=0; correct=0; streak=0;
+  updateStats();
+}
+function renderStudyQuestion(){
+  const easyOn = load("jg_settings_udl", {}).easy;
+  const hintFirst = load("jg_settings_udl", {}).hintFirst;
+  const bigBtns = load("jg_settings_udl", {}).bigButtons;
+  const qText = document.getElementById("qText");
+  const qTextEasy = document.getElementById("qTextEasy");
+  const qExplain = document.getElementById("qExplain");
+
+  const q = studySession.pool[studySession.index];
+  if(!q){
+    document.getElementById("qMeta").textContent = "";
+    qText.textContent = "세션이 끝났습니다. ‘새 세션(10문항)’을 눌러 다시 시작하세요.";
+    document.getElementById("qChoices").innerHTML="";
+    qTextEasy.classList.add("hidden"); qExplain.classList.add("hidden");
+    document.getElementById("statSession").textContent = "10/10";
+    return;
+  }
+  selectedOption = null;
+  document.getElementById("qMeta").textContent = `영역: ${q.category} · 난이도: ${q.difficulty} · ${studySession.index+1}/10`;
+  qText.textContent = q.q;
+  if(easyOn && q.simple){ qTextEasy.textContent = "쉬운 글: " + q.simple; qTextEasy.classList.remove("hidden"); } else { qTextEasy.classList.add("hidden"); }
+
+  // 힌트(정답 마스킹)
+  const hintText = q.hint ? q.hint : (q.explain || "");
+  if(hintFirst && hintText){
+    qExplain.classList.remove("hidden"); qExplain.textContent = "힌트: " + maskAnswerInText(hintText, q);
+  } else {
+    qExplain.classList.add("hidden"); qExplain.textContent = q.explain? "해설: "+q.explain : "";
+  }
+
+  const choices = document.getElementById("qChoices"); choices.innerHTML="";
+  q.options.forEach((opt, idx)=>{
+    const id = `qChoices-opt-${idx}`;
+    const label = document.createElement("label");
+    label.className="option" + (bigBtns? " big": "");
+    label.setAttribute("role","radio"); label.setAttribute("aria-checked","false"); label.tabIndex = 0;
+    const input = document.createElement("input"); input.type="radio"; input.name="qChoices"; input.id=id; input.value=idx+1;
+    input.addEventListener("change", ()=>{
+      selectedOption = idx+1;
+      for(const l of choices.querySelectorAll(".option")){ l.setAttribute("aria-checked","false"); }
+      label.setAttribute("aria-checked","true");
+    });
+    label.addEventListener("keydown", (e)=>{
+      if(e.key>='1' && e.key<='9'){
+        const n = parseInt(e.key,10);
+        const inputN = choices.querySelectorAll("input")[n-1];
+        if(inputN){ inputN.checked=true; inputN.dispatchEvent(new Event("change")); }
+      }
+    });
+    const txt = document.createElement("div"); txt.innerHTML = `<strong>${idx+1}.</strong> ${opt}`;
+    label.appendChild(input); label.appendChild(txt); choices.appendChild(label);
+  });
+
+  const autoTTS = load("jg_settings_udl", {}).autoTTS;
+  if(autoTTS){
+    const opts = Array.from(document.querySelectorAll("#qChoices .option")).map((el,i)=>`${i+1}번, ${el.textContent.trim()}`);
+    ttsSpeak([qText.textContent, ...opts].join(". "));
+  }
+  document.getElementById("qStatus").innerHTML = "";
+  document.getElementById("statSession").textContent = `${studySession.index+1}/10`;
+}
+document.getElementById("checkBtn").addEventListener("click", ()=>{
+  const q = studySession.pool[studySession.index];
+  if(!q) return;
+  if(!selectedOption) return alert("보기를 선택해 주세요.");
+  const choices = document.getElementById("qChoices").querySelectorAll(".option");
+  choices.forEach((el,i)=>{
+    el.classList.remove("correct","incorrect");
+    if(i+1===q.answer) el.classList.add("correct");
+    if(i+1===selectedOption && selectedOption!==q.answer) el.classList.add("incorrect");
+  });
+  const ok = selectedOption===q.answer;
+  solved++; if(ok){ correct++; streak++; } else { streak=0; }
+  document.getElementById("studyCard").classList.add("pulse"); setTimeout(()=>document.getElementById("studyCard").classList.remove("pulse"), 600);
+
+  const status = document.getElementById("qStatus");
+  status.innerHTML = ok ? `<span class="pill" style="border-color:var(--accent); color:var(--accent)">정답!</span>`
+                        : `<span class="pill" style="border-color:var(--danger); color:var(--danger)">오답</span>`;
+
+  // 오답일 때만 간략 해설, 힌트는 항상 마스킹
+  const ex = document.getElementById("qExplain");
+  const hintText = q.hint ? q.hint : (q.explain || "");
+  if(!ok && hintText){ ex.classList.remove("hidden"); ex.textContent = "힌트: " + maskAnswerInText(hintText, q); ex.focus(); }
+
+  updateStats();
+
+  // 자동 다음
+  setTimeout(()=>{
+    studySession.index++;
+    renderStudyQuestion();
+  }, ok ? 900 : 1600);
+});
+document.getElementById("shuffleBtn").addEventListener("click", ()=>{ startNewStudySession(); renderStudyQuestion(); });
+document.getElementById("hintBtn").addEventListener("click", ()=>{
+  const q = studySession.pool[studySession.index];
+  if(!q) return;
+  const ex = document.getElementById("qExplain");
+  const hintText = q.hint ? q.hint : (q.explain || "");
+  if(hintText){
+    if(ex.classList.contains("hidden")){
+      ex.classList.remove("hidden"); ex.textContent = "힌트: " + maskAnswerInText(hintText, q);
+    } else {
+      ex.classList.add("hidden");
+    }
+  }
+});
+function updateStats(){
+  document.getElementById("statSolved").textContent = solved;
+  document.getElementById("statCorrect").textContent = correct;
+  document.getElementById("statRate").textContent = solved? Math.round(correct/solved*100)+"%":"0%";
+  document.getElementById("statStreak").textContent = streak;
+}
+
+// ---------- EXAM (10문항 고정, 무중복) ----------
+let exam = null; let examTimerId = null;
+document.getElementById("startExamBtn").addEventListener("click", startExam);
+document.getElementById("examSubmitBtn").addEventListener("click", submitExamAnswer);
+document.getElementById("examNextBtn").addEventListener("click", nextExamQuestion);
+document.getElementById("examFinishBtn").addEventListener("click", finishExam);
+
+function startExam(){
+  const minutes = Math.max(5, Math.min(120, Number(document.getElementById("examMinutes").value)||20));
+  const cat = document.getElementById("examCategory").value;
+  const pool = bank.filter(q=>(!cat||q.category===cat));
+  if(pool.length < 10){ return alert(`선택한 조건의 문항이 ${pool.length}개입니다. 모의고사는 10문항이 필요합니다.`); }
+  const picked = shuffle(pool.slice()).slice(0, 10); // 10 unique
+  exam = { questions: picked, index: 0, answers: Array(picked.length).fill(null), remain: minutes*60, startedAt: Date.now() };
+  document.getElementById("examCard").classList.remove("hidden");
+  document.getElementById("examResult").classList.add("hidden");
+  renderExamQuestion();
+  if(examTimerId) clearInterval(examTimerId);
+  examTimerId = setInterval(()=>{
+    if(!exam) return;
+    exam.remain--;
+    document.getElementById("examTimer").textContent = formatTime(Math.max(0,exam.remain));
+    if(exam.remain<=0){ finishExam(); }
+  },1000);
+}
+function renderExamQuestion(){
+  const q = exam.questions[exam.index];
+  document.getElementById("examProgress").textContent = `${exam.index+1}/10`;
+  renderQuestion(q, "examQText", "examChoices", "examExplain", "examMeta");
+}
+function renderQuestion(q, textId, choicesId, explainId, metaId){
+  const meta = document.getElementById(metaId); if(meta) meta.textContent = `영역: ${q.category} · 난이도: ${q.difficulty}`;
+  document.getElementById(textId).textContent = q.q;
+  const choices = document.getElementById(choicesId); choices.innerHTML = "";
+  q.options.forEach((opt, idx)=>{
+    const id = `${choicesId}-opt-${idx}`;
+    const label = document.createElement("label"); label.className="option";
+    label.setAttribute("role","radio"); label.setAttribute("aria-checked","false"); label.tabIndex = 0;
+    const input = document.createElement("input"); input.type="radio"; input.name=choicesId; input.id=id; input.value=idx+1;
+    input.addEventListener("change", ()=>{ for(const l of choices.querySelectorAll(".option")){ l.setAttribute("aria-checked","false"); } label.setAttribute("aria-checked","true"); });
+    const txt = document.createElement("div"); txt.innerHTML = `<strong>${idx+1}.</strong> ${opt}`;
+    label.appendChild(input); label.appendChild(txt); choices.appendChild(label);
+  });
+  const ex = document.getElementById(explainId); if(ex){ ex.classList.add("hidden"); ex.textContent = q.explain || ""; }
+}
+function submitExamAnswer(){
+  const wrap = document.getElementById("examChoices");
+  const inputs = wrap.querySelectorAll("input[type=radio]");
+  let picked=null; inputs.forEach((inp,i)=>{ if(inp.checked) picked=i+1; });
+  if(!picked) return alert("보기를 선택해 주세요.");
+  exam.answers[exam.index]=picked;
+}
+function nextExamQuestion(){ if(!exam) return; if(exam.index < exam.questions.length-1){ exam.index++; renderExamQuestion(); } else { finishExam(); } }
+function finishExam(){
+  if(!exam) return;
+  if(examTimerId){ clearInterval(examTimerId); examTimerId=null; }
+  let got=0; exam.questions.forEach((q,i)=>{ if(exam.answers[i]===q.answer) got++; });
+  const rate = Math.round(got/10*100);
+  const secsUsed = Math.floor((Date.now()-exam.startedAt)/1000);
+  const summary = `총 10문항 중 ${got}문항 정답 (${rate}%), 응시 시간 ${formatTime(secsUsed)}`;
+  document.getElementById("examSummary").innerHTML = `<strong>${summary}</strong>`;
+  document.getElementById("examResult").classList.remove("hidden");
+  const d = document.createElement("div"); d.style.marginTop="8px";
+  const ol = document.createElement("ol");
+  exam.questions.forEach((q,i)=>{
+    const li=document.createElement("li");
+    const a = exam.answers[i] ?? "-";
+    const ok = (a===q.answer);
+    li.innerHTML = `<div style="margin:6px 0;"><strong>${q.q}</strong><br>
+    ▶ 선택: ${a}번 ${q.options[a-1]||""} / 정답: ${q.answer}번 ${q.options[q.answer-1]} ${ok? "✅":"❌"}
+    ${q.explain? `<div style="margin-top:4px; color:var(--muted)">해설: ${q.explain}</div>`:""}</div>`;
+    ol.appendChild(li);
+  });
+  d.appendChild(ol);
+  document.getElementById("examSummary").appendChild(d);
+  document.getElementById("examCard").classList.add("hidden");
+  document.getElementById("saveResultBtn").onclick = ()=>{
+    const recs = load("jg_results", []);
+    const student = load("jg_current_student", "");
+    recs.unshift({ at: new Date().toISOString(), count: 10, correct: got, rate, seconds: secsUsed, category: document.getElementById("examCategory").value || "전체", student });
+    save("jg_results", recs);
+    renderHistory();
+    alert("성적이 저장되었습니다.");
+  };
+  document.getElementById("printResultBtn").onclick = ()=>{ window.print(); };
+  exam=null;
+}
+
+// ---------- RESULTS/HISTORY ----------
+function renderHistory(){
+  const recs = load("jg_results", []);
+  const cur = load("jg_current_student", "");
+  const box = document.getElementById("history");
+  const filtered = recs.filter(r=>!cur || r.student===cur);
+  if(!filtered.length){ box.innerHTML = "<em>현재 학생의 저장된 성적이 없습니다.</em>"; return; }
+  const table = document.createElement("table");
+  table.style.width="100%"; table.style.borderCollapse="collapse";
+  table.innerHTML = `<thead>
+    <tr>
+      <th style="text-align:left; border-bottom:1px solid var(--border); padding:8px;">응시일</th>
+      <th style="text-align:center; border-bottom:1px solid var(--border); padding:8px;">학생</th>
+      <th style="text-align:center; border-bottom:1px solid var(--border); padding:8px;">영역</th>
+      <th style="text-align:right; border-bottom:1px solid var(--border); padding:8px;">문항수</th>
+      <th style="text-align:right; border-bottom:1px solid var(--border); padding:8px;">정답</th>
+      <th style="text-align:right; border-bottom:1px solid var(--border); padding:8px;">정답률</th>
+      <th style="text-align:right; border-bottom:1px solid var(--border); padding:8px;">시간</th>
+    </tr>
+  </thead>`;
+  const tb = document.createElement("tbody");
+  filtered.forEach(r=>{
+    const tr=document.createElement("tr");
+    tr.innerHTML = `
+      <td style="padding:8px; border-bottom:1px dashed var(--border);">${new Date(r.at).toLocaleString()}</td>
+      <td style="padding:8px; border-bottom:1px dashed var(--border); text-align:center;">${r.student||"-"}</td>
+      <td style="padding:8px; border-bottom:1px dashed var(--border); text-align:center;">${r.category}</td>
+      <td style="padding:8px; border-bottom:1px dashed var(--border); text-align:right;">${r.count}</td>
+      <td style="padding:8px; border-bottom:1px dashed var(--border); text-align:right;">${r.correct}</td>
+      <td style="padding:8px; border-bottom:1px dashed var(--border); text-align:right;">${r.rate}%</td>
+      <td style="padding:8px; border-bottom:1px dashed var(--border); text-align:right;">${formatTime(r.seconds)}</td>
+    `;
+    tb.appendChild(tr);
+  });
+  table.appendChild(tb);
+  box.innerHTML=""; box.appendChild(table);
+}
+document.getElementById("exportDataBtn").addEventListener("click", ()=>{
+  const payload = { bank: bank, results: load("jg_results", []), students: load("jg_students", []), current: load("jg_current_student","") };
+  const blob = new Blob([JSON.stringify(payload,null,2)], {type:"application/json"});
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "jg_export.json"; a.click();
+});
+document.getElementById("importDataBtn").addEventListener("click", ()=>{ document.getElementById("importFile").click(); });
+document.getElementById("importFile").addEventListener("change", (e)=>{
+  const f = e.target.files[0]; if(!f) return;
+  const reader = new FileReader();
+  reader.onload = ()=>{
+    try{
+      const payload = JSON.parse(reader.result);
+      if(payload.bank) { bank = payload.bank; persistBank(); }
+      if(payload.results) { save("jg_results", payload.results); }
+      if(payload.students) { save("jg_students", payload.students); }
+      if(payload.current) { save("jg_current_student", payload.current); }
+      renderStudentUI(); renderHistory(); startNewStudySession(); renderStudyQuestion();
+      alert("가져오기가 완료되었습니다.");
+    }catch(err){ alert("가져오기 오류: JSON 파일을 확인해 주세요."); }
+  };
+  reader.readAsText(f, "utf-8");
+});
+document.getElementById("clearHistoryBtn").addEventListener("click", ()=>{
+  const cur = load("jg_current_student",""); if(!cur) return alert("학생이 선택되지 않았습니다.");
+  if(confirm(`${cur} 학생의 성적 기록을 모두 삭제할까요?`)){
+    const recs = load("jg_results", []).filter(r=>r.student!==cur);
+    save("jg_results", recs); renderHistory();
+  }
+});
+
+// ---------- ADMIN ----------
+const ADMIN_PASS_KEY = "jg_admin_pass";
+if(!load(ADMIN_PASS_KEY, null)) save(ADMIN_PASS_KEY, "0000");
+
+document.getElementById("adminLoginBtn").addEventListener("click", ()=>{
+  const input = document.getElementById("adminKey").value.trim();
+  const pass = load(ADMIN_PASS_KEY, "0000");
+  if(input===pass){
+    document.getElementById("adminGuard").classList.add("hidden");
+    document.getElementById("adminPanel").classList.remove("hidden");
+    renderAdminList();
+  } else {
+    alert("비밀번호가 올바르지 않습니다.");
+  }
+});
+document.getElementById("addQuestionBtn").addEventListener("click", ()=>{
+  const q = {
+    id: Date.now(),
+    category: document.getElementById("aCategory").value,
+    difficulty: document.getElementById("aDifficulty").value,
+    type: "mcq",
+    q: document.getElementById("aQuestion").value.trim(),
+    simple: document.getElementById("aQuestionEasy").value.trim(),
+    options: Array.from(document.querySelectorAll(".aOption")).map(i=>i.value.trim()).filter(Boolean),
+    answer: Number(document.getElementById("aAnswer").value)||1,
+    hint: document.getElementById("aHint").value.trim(),
+    explain: document.getElementById("aExplain").value.trim()
+  };
+  if(!q.q || q.options.length<2) return alert("문항과 보기(2개 이상)를 입력해 주세요.");
+  if(q.answer<1 || q.answer>q.options.length) return alert("정답 번호를 확인해 주세요.");
+  if(!q.simple) delete q.simple;
+  if(!q.hint) delete q.hint;
+  bank.push(q); persistBank(); renderAdminList(); alert("문항이 추가되었습니다.");
+});
+function renderAdminList(){
+  const wrap = document.getElementById("adminList");
+  wrap.innerHTML = `현재 문항 수: ${bank.length}`;
+  const ul = document.createElement("ul"); ul.style.paddingLeft="18px";
+  bank.forEach((q,i)=>{
+    const li=document.createElement("li");
+    li.innerHTML = `<strong>[${q.category}/${q.difficulty}]</strong> ${q.q.slice(0,60)}… 
+      <button data-i="${i}" class="btn ghost" style="margin-left:8px;">삭제</button>`;
+    ul.appendChild(li);
+  });
+  wrap.appendChild(ul);
+  ul.querySelectorAll("button").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      const idx = Number(btn.getAttribute("data-i"));
+      if(confirm("이 문항을 삭제할까요?")){
+        bank.splice(idx,1); persistBank(); renderAdminList();
+      }
+    });
+  });
+  document.getElementById("downloadBankBtn").onclick = ()=>{
+    const blob = new Blob([JSON.stringify(bank,null,2)],{type:"application/json"});
+    const a = document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="question_bank.json"; a.click();
+  };
+  document.getElementById("uploadBankBtn").onclick = ()=> document.getElementById("uploadBankFile").click();
+  document.getElementById("uploadBankFile").onchange = (e)=>{
+    const f=e.target.files[0]; if(!f) return;
+    const r=new FileReader();
+    r.onload=()=>{
+      try{
+        const data=JSON.parse(r.result);
+        if(Array.isArray(data)){ bank=data; persistBank(); renderAdminList(); startNewStudySession(); renderStudyQuestion(); alert("문항 은행이 교체되었습니다."); }
+        else alert("JSON 배열 형식이 아닙니다.");
+      }catch(e){ alert("JSON 파싱 오류입니다."); }
+    };
+    r.readAsText(f,"utf-8");
+  };
+  document.getElementById("resetBankBtn").onclick = ()=>{
+    if(confirm("샘플 문항으로 초기화할까요? 현재 문항은 삭제됩니다.")){
+      bank = DEFAULT_BANK.slice(); persistBank(); renderAdminList(); startNewStudySession(); renderStudyQuestion();
+    }
+  };
+}
+
+// ---------- 접근성/UDL ----------
+function applySavedSettings(){
+  const st = load("jg_settings", {});
+  if(st.fontLarge) document.body.setAttribute("data-fontsize","large");
+  if(st.fontXL) document.body.setAttribute("data-fontsize","xlarge");
+  if(st.letterWide) document.body.setAttribute("data-letterspace","wide");
+  if(st.lineLoose) document.body.setAttribute("data-lineheight","loose");
+  if(st.dyslexic) document.body.setAttribute("data-dyslexic","true");
+  if(st.contrastHigh) document.documentElement.setAttribute("data-contrast","high");
+
+  const udl = load("jg_settings_udl", { easy:false, hintFirst:false, bigButtons:false, autoTTS:false });
+  document.getElementById("udlEasy").checked = udl.easy;
+  document.getElementById("udlHintFirst").checked = udl.hintFirst;
+  document.getElementById("udlBigButtons").checked = udl.bigButtons;
+  document.getElementById("udlAutoTTS").checked = udl.autoTTS;
+}
+function saveSettingsFromToggles(){
+  const st = {
+    fontLarge: document.getElementById("setLargeFont").checked,
+    letterWide: document.getElementById("setWideSpacing").checked,
+    lineLoose: document.getElementById("setLooseLine").checked,
+    dyslexic: document.getElementById("setDyslexic").checked,
+    contrastHigh: document.getElementById("setHighContrast").checked,
+  };
+  save("jg_settings", st);
+  document.body.removeAttribute("data-fontsize"); if(st.fontLarge) document.body.setAttribute("data-fontsize","large");
+  document.body.removeAttribute("data-letterspace"); if(st.letterWide) document.body.setAttribute("data-letterspace","wide");
+  document.body.removeAttribute("data-lineheight"); if(st.lineLoose) document.body.setAttribute("data-lineheight","loose");
+  document.body.removeAttribute("data-dyslexic"); if(st.dyslexic) document.body.setAttribute("data-dyslexic","true");
+  document.documentElement.removeAttribute("data-contrast"); if(st.contrastHigh) document.documentElement.setAttribute("data-contrast","high");
+}
+document.getElementById("setLargeFont").addEventListener("change", saveSettingsFromToggles);
+document.getElementById("setWideSpacing").addEventListener("change", saveSettingsFromToggles);
+document.getElementById("setLooseLine").addEventListener("change", saveSettingsFromToggles);
+document.getElementById("setDyslexic").addEventListener("change", saveSettingsFromToggles);
+document.getElementById("setHighContrast").addEventListener("change", saveSettingsFromToggles);
+
+function saveUDL(){
+  const u = {
+    easy: document.getElementById("udlEasy").checked,
+    hintFirst: document.getElementById("udlHintFirst").checked,
+    bigButtons: document.getElementById("udlBigButtons").checked,
+    autoTTS: document.getElementById("udlAutoTTS").checked,
+  };
+  save("jg_settings_udl", u);
+  // 설정 변경 시 현재 세션 화면 갱신
+  renderStudyQuestion();
+}
+document.getElementById("udlEasy").addEventListener("change", saveUDL);
+document.getElementById("udlHintFirst").addEventListener("change", saveUDL);
+document.getElementById("udlBigButtons").addEventListener("change", saveUDL);
+document.getElementById("udlAutoTTS").addEventListener("change", saveUDL);
+
+document.getElementById("contrastBtn").addEventListener("click", ()=>{
+  const attr = document.documentElement.getAttribute("data-contrast")==="high";
+  document.documentElement.setAttribute("data-contrast", attr?"":"high");
+  const st = load("jg_settings", {}); st.contrastHigh = !attr; save("jg_settings", st);
+});
+document.getElementById("fontBtn").addEventListener("click", ()=>{
+  const cur = document.body.getAttribute("data-fontsize");
+  const next = (cur==="xlarge") ? "" : (cur==="large" ? "xlarge" : "large");
+  if(next) document.body.setAttribute("data-fontsize", next); else document.body.removeAttribute("data-fontsize");
+});
+document.getElementById("ttsBtn").addEventListener("click", ()=>{
+  const v = document.querySelector("#studyCard .question-text:not(.hidden)")?.textContent || "";
+  const opts = Array.from(document.querySelectorAll("#qChoices .option")).map((el,i)=>`${i+1}번, ${el.textContent.trim()}`);
+  ttsSpeak([v, ...opts].join(". "));
+});
+
+// 도움말
+const helpDlg = document.getElementById("helpDialog");
+document.getElementById("helpBtn").addEventListener("click", ()=>helpDlg.showModal());
+document.getElementById("helpCloseBtn").addEventListener("click", ()=>helpDlg.close());
+
+// 탭/키보드
+function gotoTab(name){
+  const views = ["study","exam","results","admin","settings"];
+  views.forEach(v=>{
+    document.getElementById(`view-${v}`).classList.toggle("hidden", v!==name);
+    const tabBtn = document.querySelector(`.tab[data-tab="${v}"]`);
+    if(tabBtn){ tabBtn.setAttribute("aria-selected", (v===name) ? "true" : "false"); }
+  });
+}
+document.querySelectorAll(".tab").forEach(btn=>{ btn.addEventListener("click", ()=> gotoTab(btn.dataset.tab)); });
+document.addEventListener("keydown", (e)=>{
+  if(e.key==="Enter"){ 
+    const vStudy = !document.getElementById("view-study").classList.contains("hidden");
+    const vExam  = !document.getElementById("view-exam").classList.contains("hidden");
+    if(vStudy) document.getElementById("checkBtn").click();
+    if(vExam) document.getElementById("examSubmitBtn").click();
+  }
+  if(e.altKey && (e.key==="l"||e.key==="L")) document.getElementById("ttsBtn").click();
+  if(e.altKey && (e.key==="c"||e.key==="C")) document.getElementById("contrastBtn").click();
+  if(e.altKey && (e.key==="f"||e.key==="F")) document.getElementById("fontBtn").click();
+  if(e.key==="h"||e.key==="H") document.getElementById("helpBtn").click();
+  if(e.key>='1' && e.key<='9'){
+    const radios = document.querySelectorAll("#qChoices input[type=radio], #examChoices input[type=radio]");
+    const target = radios[e.key-1]; if(target){ target.checked=true; target.dispatchEvent(new Event("change")); }
+  }
+});
+
+// Speech voices
+if("speechSynthesis" in window){ speechSynthesis.onvoiceschanged = ()=>{ voicesReady = true; }; }
+</script>
+</body>
+</html>
